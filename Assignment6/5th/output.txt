@@ -1,0 +1,5 @@
+Articulation Nodes: 
+1 4 
+Bridges: 
+1 4
+0 1
