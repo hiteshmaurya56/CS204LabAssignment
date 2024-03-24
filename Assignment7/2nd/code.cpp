@@ -14,8 +14,8 @@ int main()
     cin.open("input.txt");
     vector<vector<int>> v = input();
     cin.close();
-    cout.open("ouput.txt");
     pair<int, vector<int>> jobs = getMaxProfit(v);
+    cout.open("ouput.txt");
     cout << "Maximum Profit: " << jobs.first << endl;
     cout << "Jobs done:" << endl;
     for (int c : jobs.second)
@@ -44,8 +44,6 @@ bool comp(vector<int> &a, vector<int> &b)
 pair<int, vector<int>> getMaxProfit(vector<vector<int>> &jobs)
 {
     sort(jobs.begin(), jobs.end(), comp);
-    for (int i = 0; i < jobs.size(); i++)
-        cout << jobs[i][0] << ' ' << jobs[i][1] << ' ' << jobs[i][2] << endl;
     vector<int> jobId;
     int i, profit = 0, preJob = -1, n = jobs.size();
     for (i = 0; i < n; i++)
