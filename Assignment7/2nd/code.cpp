@@ -2,57 +2,79 @@
 #include <vector>
 #include <algorithm>
 #include <utility>
+#include <set>
 using namespace std;
 ifstream cin;
 ofstream cout;
 
-vector<vector<int>> input();
-pair<int, vector<int>> getMaxProfit(vector<vector<int>> &);
+struct Job
+{
+public:
+    int id, dead, profit;
+};
+
+vector<Job> input();
+pair<int, vector<int>> getMaxProfit(vector<Job> &);
 
 int main()
 {
     cin.open("input.txt");
-    vector<vector<int>> v = input();
+    vector<Job> v = input();
     cin.close();
     pair<int, vector<int>> jobs = getMaxProfit(v);
+    sort(jobs.second.begin(), jobs.second.end());
     cout.open("ouput.txt");
     cout << "Maximum Profit: " << jobs.first << endl;
-    cout << "Jobs done:" << endl;
+    cout << "Jobs done: " << jobs.second.size() << endl;
+    cout << "Job IDs: " << endl;
     for (int c : jobs.second)
         cout << c << ' ';
     cout.close();
     return 0;
 }
 
-vector<vector<int>> input()
+vector<Job> input()
 {
     int i, n;
     cin >> n;
-    vector<vector<int>> v(n, vector<int>(3));
+    vector<Job> v(n);
     for (i = 0; i < n; i++)
-        cin >> v[i][0] >> v[i][1] >> v[i][2];
+        cin >> v[i].id >> v[i].dead >> v[i].profit;
     return v;
 }
 
-bool comp(vector<int> &a, vector<int> &b)
+struct comp
 {
-    if (a[1] != b[1])
-        return a[1] < b[1];
-    return a[2] > b[2];
-}
-
-pair<int, vector<int>> getMaxProfit(vector<vector<int>> &jobs)
-{
-    sort(jobs.begin(), jobs.end(), comp);
-    vector<int> jobId;
-    int i, profit = 0, preJob = -1, n = jobs.size();
-    for (i = 0; i < n; i++)
+    bool operator()(const Job &a, const Job &b)
     {
-        if (jobs[i][1] == preJob)
-            continue;
-        preJob = jobs[i][1];
-        jobId.push_back(jobs[i][0]);
-        profit += jobs[i][2];
+        if (a.profit != b.profit)
+            return a.profit > b.profit;
+        return a.id < b.id;
     }
-    return {profit, jobId};
+};
+
+pair<int, vector<int>> getMaxProfit(vector<Job> &jobs)
+{
+    sort(jobs.begin(), jobs.end(), [](const Job &a, const Job &b)
+         { return a.dead <= b.dead; });
+    vector<int> jobId;
+    set<Job, comp> s;
+    Job curJob;
+    int i, j, n = jobs.size();
+    i = n - 1;
+    pair<int, vector<int>> ans;
+    j = jobs[n - 1].dead;
+    while (j)
+    {
+        while (i >= 0 && jobs[i].dead >= j)
+            s.insert(jobs[i--]);
+        j--;
+        if (s.empty())
+            continue;
+        curJob = *s.begin();
+        s.erase(s.begin());
+        ans.first += curJob.profit;
+        ans.second.push_back(curJob.id);
+    }
+    return ans;
 }
